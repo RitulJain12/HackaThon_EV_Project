@@ -6,6 +6,6 @@ const router = express.Router();
 
 router.post('/add', validateToken, isStationOwner, addStation);
 
-router.get('/nearby', validateToken, getNearbyStations);
+router.get('/nearby', getNearbyStations);
 
 module.exports = router;
