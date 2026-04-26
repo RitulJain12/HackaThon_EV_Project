@@ -39,7 +39,7 @@ const {JWT_KEY}=require('../config/config');
     const { email, password } = req.body;
 
     try {
-      const user = await User.findOne({ email });
+      const user = await User.findOne({ email }).select("+password");
       if (!user) {
         return res.status(404).json({ error: 'User not found' });
       }
@@ -48,17 +48,25 @@ const {JWT_KEY}=require('../config/config');
       if (!isMatch) {
         return res.status(401).json({ error: 'Invalid credentials' });
       }
-
+           
         const token = jwt.sign({ id: user._id, role: user.role }, JWT_KEY, {
           expiresIn: '1d',
         });
 
         res.cookie('token', token, { httpOnly: true });
+        const userdet={
+          name:user.name,
+          email,
+          id:user._id,
+          role:user.role,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt
+        }
 
-      res.json(user);
+      res.json(userdet);
     } catch (error) {
       res.status(400).json({ error: error.message });
-    }
+    } 
   };
 
   module.exports = {
