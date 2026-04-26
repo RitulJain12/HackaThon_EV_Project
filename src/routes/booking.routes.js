@@ -1,8 +1,40 @@
 const express = require('express');
-const { createBooking, getUserBookings } = require('../controllers/booking.controller');
+const {
+    createBooking,
+    checkAvailability,
+    getUserBookings,
+    getBookingById,
+    cancelBooking,
+    checkIn,
+    completeBooking,
+    getStationBookings,
+} = require('../controllers/booking.controller');
+const { validateToken } = require('../middlewares/auth.middleware');
+const { authorize } = require('../middlewares/authorize.middleware');
+const {
+    createBookingValidation,
+    cancelBookingValidation,
+    checkAvailabilityValidation,
+} = require('../validations/booking.validation');
+const { handleValidationErrors } = require('../middlewares/validate.middleware');
+
 const router = express.Router();
 
-router.post('/create', createBooking);
-router.get('/user/:userId', getUserBookings);
+router.use(validateToken);
+
+router.post('/create', createBookingValidation, handleValidationErrors, createBooking);
+router.get('/availability', checkAvailabilityValidation, handleValidationErrors, checkAvailability);
+router.get('/my-bookings', getUserBookings);
+
+router.get(
+    '/station/:stationId',
+    authorize('StationOwner', 'admin'),
+    getStationBookings
+);
+
+router.get('/:bookingId', getBookingById);
+router.post('/:bookingId/cancel', cancelBookingValidation, handleValidationErrors, cancelBooking);
+router.post('/:bookingId/check-in', checkIn);
+router.post('/:bookingId/complete', completeBooking);
 
 module.exports = router;
